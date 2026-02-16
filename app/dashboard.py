@@ -17,34 +17,28 @@ def load_assets():
 
 try:
     model, encoders, scaler, df_master = load_assets()
-except Exception as e:
-    st.error(f"Missing Assets! Run 'python main.py' first. Details: {e}")
+except:
+    st.error("Assets missing! Please run 'python main.py' first.")
     st.stop()
 
 student_id = st.sidebar.selectbox("Select Student ID", df_master['id_student'].unique())
 student_row = df_master[df_master['id_student'] == student_id].copy()
 
-# --- STEP 1: DROP NON-FEATURES (Must match training exactly!) ---
-# Crucial: We drop 'target' here so it doesn't break the scaler!
-X_input = student_row.drop(columns=['id_student', 'code_module', 'code_presentation', 
-                                    'final_result', 'date_unregistration', 'target'], errors='ignore')
-
-# --- STEP 2: CONVERT TEXT TO NUMBERS ---
+# STEP 1: Preprocess (Must drop 'target' to match Scaler!)
+X_input = student_row.drop(columns=['id_student', 'code_module', 'code_presentation', 'final_result', 'date_unregistration', 'target'], errors='ignore')
 for col, le in encoders.items():
     if col in X_input.columns:
         X_input[col] = le.transform(X_input[col].astype(str))
-
-# --- STEP 3: APPLY SCALING ---
 X_input_scaled = scaler.transform(X_input)
 
-# --- STEP 4: PREDICT (FIXED INDEXING) ---
-#  gets the specific At-Risk probability for the first student
+# --- STEP 2: PREDICT (FIXED INDEXING) ---
+#  means: 1st student row, 2nd column (Risk Probability)
 risk_prob_val = model.predict_proba(X_input_scaled)
 risk_prob = float(risk_prob_val)
 
 risk_level = "High Risk" if risk_prob > 0.6 else "Medium Risk" if risk_prob > 0.3 else "Low Risk"
 
-# --- STEP 5: DISPLAY ---
+# STEP 3: Display
 c1, c2, c3 = st.columns(3)
 c1.metric("Predicted Status", risk_level)
 c2.metric("Risk Probability", f"{risk_prob*100:.1f}%")
@@ -56,6 +50,6 @@ explainer = shap.TreeExplainer(model)
 shap_values = explainer(X_explain)
 
 fig, ax = plt.subplots(figsize=(10, 4))
-# Index  ensures we only visualize the selected student
-shap.plots.waterfall(shap_values, show=False)
+# [0, :, 1] tells SHAP to explain only the selected student and the 'Risk' outcome
+shap.plots.waterfall(shap_values[0, :, 1], show=False)
 st.pyplot(fig)

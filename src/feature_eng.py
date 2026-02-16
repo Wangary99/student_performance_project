@@ -6,16 +6,14 @@ from imblearn.over_sampling import SMOTE
 
 def prepare_features(df):
     print("--- Phase 2: Feature Engineering & SMOTE ---")
-    
-    # 1. Map Result to Binary Target (1 = At-Risk, 0 = Success)
     target_map = {'Pass': 0, 'Distinction': 0, 'Fail': 1, 'Withdrawn': 1}
     df['target'] = df['final_result'].map(target_map)
-
-    # 2. Drop non-predictive columns
+    
+    # Drop identifiers and target (Must be consistent with dashboard!)
     df_clean = df.drop(columns=['id_student', 'code_module', 'code_presentation', 
                                 'final_result', 'date_unregistration'], errors='ignore')
 
-    # 3. Label Encoding (Save them for the dashboard!)
+    # Save Encoders
     encoders = {}
     cat_cols = df_clean.select_dtypes(include=['object']).columns
     for col in cat_cols:
@@ -28,13 +26,11 @@ def prepare_features(df):
     y = df_clean['target']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # 4. Standard Scaling (Save it for the dashboard!)
+    # Save Scaler
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     joblib.dump(scaler, "models/standard_scaler.pkl")
 
-    # 5. Handle Class Imbalance
     X_res, y_res = SMOTE(random_state=42).fit_resample(X_train_scaled, y_train)
-    
     return X_res, X_test_scaled, y_res, y_test, X.columns
