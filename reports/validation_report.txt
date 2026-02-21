@@ -1,0 +1,26 @@
+=======================================================
+   STUDENT PERFORMANCE PREDICTION - VALIDATION REPORT
+=======================================================
+
+RANDOM FOREST
+-----------------------------------
+  Accuracy:          0.7984
+  Precision:         0.8515
+  Recall:            0.7523
+  F1-Score:          0.7988
+  K-Fold CV F1 Mean: 0.7946
+  K-Fold CV F1 Std:  0.0062
+
+XGBOOST
+-----------------------------------
+  Accuracy:          0.7882
+  Precision:         0.8240
+  Recall:            0.7653
+  F1-Score:          0.7935
+  K-Fold CV F1 Mean: 0.7912
+  K-Fold CV F1 Std:  0.0041
+
+=======================================================
+CONCLUSION: XGBoost has higher Recall.
+Better at catching at-risk students (fewer missed cases).
+=======================================================
