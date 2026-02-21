@@ -1,0 +1,3 @@
+venv/ pycache/ .vscode/
+data/studentVle.csv
+!data/.csv !models/.pkl !models/*.csv
