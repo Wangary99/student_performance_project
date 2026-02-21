@@ -5,3 +5,5 @@ pandas==2.3.3
 numpy==2.3.5
 joblib==1.5.3
 imbalanced-learn==0.14.1
+shap
+matplotlib
